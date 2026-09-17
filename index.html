@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0e1420">
+<title>सुर साधना — Riyaz Practice</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;background:#0e1420;color:#e8eef7;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;user-select:none}
+#game{position:fixed;inset:0;width:100%;height:100%;z-index:1}
+#viz{position:fixed;bottom:0;left:0;right:0;height:130px;z-index:2}
+#hud{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:10px;
+  padding:10px 12px;font-weight:700;font-size:13px;text-shadow:0 2px 6px #0009;pointer-events:none}
+#hud > *{pointer-events:auto}
+#guideBtn{background:#1c2740;color:#e8eef7;border:1px solid #ffffff1c;border-radius:10px;
+  padding:7px 11px;font-size:15px;font-weight:700;cursor:pointer;line-height:1}
+#hud .spacer{flex:1}
+#scoreWrap,#highWrap{padding:4px 8px}
+#scoreWrap b,#highWrap b{color:#8feaff}
+#targetBox{position:fixed;top:52px;left:50%;transform:translateX(-50%);z-index:5;text-align:center;
+  pointer-events:none;transition:opacity .2s}
+#targetBox .label{font-size:10px;letter-spacing:2px;opacity:.55;text-transform:uppercase;margin-bottom:2px}
+#targetNote{font-size:64px;font-weight:800;line-height:1;color:#8feaff;
+  text-shadow:0 0 26px #5adfff66;transition:color .12s}
+#strip{position:fixed;top:138px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:5px;
+  padding:6px 8px;background:#0b1220cc;border:1px solid #ffffff14;border-radius:99px;
+  backdrop-filter:blur(8px);max-width:96vw;overflow-x:auto;scrollbar-width:none;pointer-events:none}
+#strip::-webkit-scrollbar{display:none}
+.pill{padding:6px 11px;border-radius:99px;font-weight:700;font-size:14px;color:#7f8ea8;
+  background:#ffffff08;border:1px solid transparent;transition:all .18s;white-space:nowrap}
+.pill.active{color:#0b0e1a;background:#8feaff;box-shadow:0 0 16px #8feaffaa}
+.pill.green{color:#0b0e1a;background:#7dff9a;box-shadow:0 0 20px #7dff9acc}
+.pill.yellow{color:#1a1206;background:#ffd66b;box-shadow:0 0 18px #ffd66baa}
+.pill.red{color:#fff;background:#ff6b6b;box-shadow:0 0 16px #ff6b6baa}
+#precision{position:fixed;top:180px;left:50%;transform:translateX(-50%);z-index:5;font-size:11.5px;
+  opacity:.78;text-shadow:0 2px 6px #0009;pointer-events:none;letter-spacing:.5px}
+#heard{position:fixed;bottom:150px;left:50%;transform:translateX(-50%);z-index:5;font-size:56px;
+  font-weight:800;line-height:1;text-shadow:0 0 22px #000;transition:color .15s;pointer-events:none}
+#hint{position:fixed;bottom:214px;left:50%;transform:translateX(-50%);z-index:5;font-size:13px;
+  font-weight:600;opacity:.9;text-align:center;max-width:92vw;text-shadow:0 2px 6px #0009;
+  pointer-events:none;transition:opacity .2s}
+#stopBtn{position:fixed;right:14px;bottom:148px;z-index:6;background:#2a1f2e;color:#ffb8b8;
+  border:1px solid #ff6b6b55;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:700;
+  cursor:pointer;display:none}
+#stopBtn.visible{display:block}
+#countdown{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
+  font-size:130px;font-weight:800;color:#ffd66b;text-shadow:0 0 50px #ffbd4d88;pointer-events:none}
+.hidden{display:none!important}
+#panel{position:fixed;inset:0;z-index:15;display:flex;align-items:center;justify-content:center;
+  padding:16px;overflow:auto;background:#0e1420ee;backdrop-filter:blur(6px)}
+.card{width:min(460px,94vw);max-height:94vh;overflow:auto;padding:22px 20px;
+  border:1px solid #ffffff18;border-radius:18px;background:#121a2c;box-shadow:0 20px 60px #0009}
+h1{font-size:24px;margin-bottom:6px;color:#ffd66b}
+h2{font-size:17px;margin:14px 0 8px;color:#8feaff}
+p{font-size:13.5px;line-height:1.6;opacity:.9;margin:8px 0 12px}
+button{border:0;border-radius:12px;padding:12px 22px;font-size:15px;font-weight:700;
+  cursor:pointer;font-family:inherit}
+.btnPrimary{background:#ffd06a;color:#241706}
+.btnPrimary:disabled{opacity:.5;cursor:wait}
+.btnSecondary{background:#ffffff12;color:#e8eef7;border:1px solid #ffffff20}
+.btnTiny{padding:8px 14px;font-size:13px}
+.section{margin:14px 0}
+.label{display:block;font-size:12px;opacity:.7;margin-bottom:6px;letter-spacing:.4px}
+.gRow{display:flex;gap:8px}
+.gRow button{flex:1;padding:12px 8px;font-size:14px;background:#ffffff10;color:#e8eef7;
+  border:1px solid #ffffff1c;font-weight:700}
+.gRow button.active{background:#8feaff;color:#0b0e1a;border-color:#8feaff;box-shadow:0 0 16px #8feaff66}
+input[type=range]{width:100%;accent-color:#8feaff;margin:6px 0}
+.saVal{font-weight:800;color:#ffd66b}
+.info{font-size:11.5px;line-height:1.55;opacity:.62;margin:4px 0 10px}
+.tip{padding:10px 12px;border-radius:12px;background:#ffffff08;border:1px solid #ffffff10;
+  font-size:11.5px;line-height:1.55;margin:10px 0;opacity:.9}
+.report{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.box{background:#ffffff08;border:1px solid #ffffff12;border-radius:12px;padding:12px;text-align:center}
+.box .big{font-size:22px;font-weight:800;color:#ffd66b}
+.box small{display:block;font-size:10.5px;opacity:.62;margin-top:4px}
+#guide{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;
+  padding:16px;background:#05080fee;backdrop-filter:blur(8px)}
+#guide .card{max-width:520px}
+details{border:1px solid #ffffff14;border-radius:12px;margin:8px 0;background:#0f1626;overflow:hidden}
+summary{padding:12px 14px;font-weight:700;font-size:14px;cursor:pointer;list-style:none;
+  display:flex;align-items:center;justify-content:space-between}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"▾";color:#8feaff;font-size:16px;transition:transform .2s}
+details[open] summary::after{transform:rotate(180deg)}
+details .content{padding:2px 14px 14px;font-size:13px;line-height:1.65;opacity:.9;
+  border-top:1px solid #ffffff0a}
+details .content table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12.5px}
+details .content td{padding:5px 6px;border-bottom:1px solid #ffffff0d}
+details .content td:first-child{font-weight:700;color:#8feaff}
+details .content b{color:#ffd66b}
+@media (max-height:640px){
+  #targetNote{font-size:52px}
+  #heard{font-size:46px;bottom:140px}
+  #hint{bottom:196px}
+  #viz{height:110px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+<canvas id="viz"></canvas>
+
+<div id="hud">
+  <button id="guideBtn" title="गाइड खोलें">📖</button>
+  <div id="scoreWrap">स्कोर: <b id="score">0</b></div>
+  <div class="spacer"></div>
+  <div id="highWrap">हाई: <b id="high">0</b></div>
+</div>
+
+<div id="targetBox">
+  <div class="label">लक्षित सुर</div>
+  <div id="targetNote">—</div>
+</div>
+
+<div id="strip"></div>
+<div id="precision">Pitch: —</div>
+<div id="heard">—</div>
+<div id="hint">शुरू करने के लिए START दबाएँ</div>
+
+<button id="stopBtn">■ रोकें</button>
+
+<div id="countdown" class="hidden"></div>
+
+<div id="panel"><div class="card" id="card"></div></div>
+
+<div id="guide" class="hidden"><div class="card" id="guideCard"></div></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ============================================================
+   SUR SADHANA — with vertical pitch needle + directional guidance
+   ============================================================ */
+
+const SWARAS = [
+  { name:'सा',  ratio: 1     },
+  { name:'रे',  ratio: 9/8   },
+  { name:'गा',  ratio: 5/4   },
+  { name:'मा',  ratio: 4/3   },
+  { name:'प',   ratio: 3/2   },
+  { name:'ध',   ratio: 5/3   },
+  { name:'नि',  ratio: 15/8  },
+  { name:'सां', ratio: 2     }
+];
+
+const TOL = { green: 15, yellow: 35 };
+const NOTE_DURATION_MS = 2500;
+const COUNTDOWN_START  = 5;
+const COUNTDOWN_STEP   = 700;
+
+/* ---------- DOM ---------- */
+const canvas    = document.getElementById('game');
+const ctx       = canvas.getContext('2d');
+const vizCanvas = document.getElementById('viz');
+const vctx      = vizCanvas.getContext('2d');
+const scoreEl   = document.getElementById('score');
+const highEl    = document.getElementById('high');
+const targetNoteEl = document.getElementById('targetNote');
+const heardEl   = document.getElementById('heard');
+const hintEl    = document.getElementById('hint');
+const precisionEl = document.getElementById('precision');
+const stripEl   = document.getElementById('strip');
+const countdownEl = document.getElementById('countdown');
+const panelEl   = document.getElementById('panel');
+const cardEl    = document.getElementById('card');
+const guideEl   = document.getElementById('guide');
+const guideCardEl = document.getElementById('guideCard');
+const guideBtn  = document.getElementById('guideBtn');
+const stopBtn   = document.getElementById('stopBtn');
+
+/* ---------- Global state ---------- */
+const G = {
+  phase: 'menu',
+  score: 0,
+  high: 0,
+  saHz: 130.8,
+  gender: 'male',
+
+  noteIdx: -1,
+  noteStart: 0,
+  noteGreenFrames: 0,
+  noteTotalFrames: 0,
+  noteScored: false,
+
+  rawFreq: 0,
+  freq: 0,
+  freqHistory: [],
+  centsHistory: [],
+  detectedIdx: -1,
+  cents: 999,          // absolute cents
+  signedCents: 0,      // signed (positive = sharp/high, negative = flat/low)
+  clarity: 0,
+  rms: 0,
+  lastValidMs: 0,
+  stability: 0,        // 0-1 how steady the pitch is
+
+  streak: 0,
+  bestStreak: 0,
+  notesAttempted: 0,
+  notesCorrect: 0,
+  greenTotal: 0,
+  frameTotal: 0,
+  sessionStart: 0,
+
+  t: 0,
+  vizBars: new Array(40).fill(0),
+  stars: [],
+  needleY: 0.5         // smoothed needle position 0=top(sharp) 1=bottom(flat)
+};
+
+try {
+  G.high = +localStorage.getItem('surSadhanaHigh') || 0;
+} catch (_) {}
+highEl.textContent = G.high;
+
+for (let i = 0; i < 50; i++) {
+  G.stars.push({
+    x: Math.random(), y: Math.random() * 0.55,
+    s: Math.random() * 1.2 + 0.3,
+    tw: Math.random() * Math.PI * 2,
+    sp: 0.4 + Math.random() * 0.8
+  });
+}
+
+/* ---------- Canvas sizing ---------- */
+let W = innerWidth;
+let H = innerHeight;
+let DPR = 1;
+let VH = 130;
+
+function resizeAll() {
+  DPR = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth;
+  H = innerHeight;
+  VH = innerWidth < 400 ? 110 : 130;
+
+  canvas.width  = Math.floor(W * DPR);
+  canvas.height = Math.floor(H * DPR);
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+  vizCanvas.width  = Math.floor(W * DPR);
+  vizCanvas.height = Math.floor(VH * DPR);
+  vizCanvas.style.width  = W + 'px';
+  vizCanvas.style.height = VH + 'px';
+  vctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+  const bars = Math.max(24, Math.floor(W / 12));
+  G.vizBars = new Array(bars).fill(0);
+}
+resizeAll();
+addEventListener('resize', resizeAll);
+
+/* ---------- Audio ---------- */
+let audioCtx = null;
+let analyser = null;
+let stream = null;
+let sourceNode = null;
+let timeBuf = null;
+let freqBuf = null;
+
+/* ---------- Utilities ---------- */
+function rmsOf(a) {
+  let s = 0;
+  for (let i = 0; i < a.length; i++) s += a[i] * a[i];
+  return Math.sqrt(s / a.length);
+}
+function zeroCrossings(a) {
+  let z = 0;
+  for (let i = 1; i < a.length; i++) if ((a[i - 1] < 0) !== (a[i] >= 0)) z++;
+  return z;
+}
+function removeDC(a) {
+  let m = 0;
+  for (let i = 0; i < a.length; i++) m += a[i];
+  m /= a.length;
+  for (let i = 0; i < a.length; i++) a[i] -= m;
+}
+function median(arr) {
+  if (!arr.length) return 0;
+  const s = arr.slice().sort((x, y) => x - y);
+  return s[Math.floor(s.length / 2)];
+}
+function mad(arr, med) {
+  if (!arr.length) return 0;
+  return median(arr.map(x => Math.abs(x - med)));
+}
+function centsBetween(a, b) {
+  return 1200 * Math.log2(a / b);
+}
+
+/* ---------- YIN config ---------- */
+const CFG = {
+  minF: 70, maxF: 1100,
+  frameRms: 0.012,
+  yinThreshold: 0.15,
+  clarityMin: 0.55
+};
+
+/* ---------- Correct YIN ---------- */
+function yinPitch(input, sr) {
+  const N = input.length;
+  const rms = rmsOf(input);
+  if (rms < CFG.frameRms) return null;
+
+  const work = new Float32Array(N);
+  work.set(input);
+  removeDC(work);
+
+  const minTau = Math.max(2, Math.floor(sr / CFG.maxF));
+  const maxTau = Math.min(Math.floor(sr / CFG.minF), Math.floor(N / 2) - 2);
+  if (maxTau <= minTau) return null;
+
+  const d = new Float32Array(maxTau + 1);
+  for (let tau = 1; tau <= maxTau; tau++) {
+    let sum = 0;
+    for (let i = 0; i < N - tau; i++) {
+      const v = work[i] - work[i + tau];
+      sum += v * v;
+    }
+    d[tau] = sum;
+  }
+
+  d[0] = 1;
+  let running = 0;
+  for (let tau = 1; tau <= maxTau; tau++) {
+    running += d[tau];
+    d[tau] = running > 0 ? (d[tau] * tau) / running : 1;
+  }
+
+  let tau = -1;
+  for (let t = minTau; t <= maxTau; t++) {
+    if (d[t] < CFG.yinThreshold) {
+      while (t + 1 <= maxTau && d[t + 1] < d[t]) t++;
+      tau = t;
+      break;
+    }
+  }
+  if (tau < 0) {
+    let best = minTau;
+    for (let t = minTau; t <= maxTau; t++) if (d[t] < d[best]) best = t;
+    tau = best;
+    if (d[tau] > 0.35) return null;
+  }
+  if (tau <= minTau || tau >= maxTau) return null;
+
+  const y1 = d[tau - 1], y2 = d[tau], y3 = d[tau + 1];
+  const denom = y1 - 2 * y2 + y3;
+  let better = tau;
+  if (Math.abs(denom) > 1e-9) better = tau + 0.5 * (y1 - y3) / denom;
+
+  const freq = sr / better;
+  if (freq < CFG.minF || freq > CFG.maxF) return null;
+
+  const clarity = Math.max(0, Math.min(1, 1 - d[tau]));
+  const zc = zeroCrossings(work) / (N / sr);
+  const zcLimit = Math.max(180, Math.min(2400, freq * 7));
+  if (zc > zcLimit * 1.8) return null;
+
+  return { freq, rms, clarity };
+}
+
+/* ---------- Nearest swara ---------- */
+function nearestSwara(freq) {
+  if (!(freq > 0)) return { idx: -1, cents: 999, signed: 0, target: 0 };
+  let best = { idx: -1, cents: 999, signed: 0, target: 0 };
+  for (let oct = -3; oct <= 3; oct++) {
+    for (let i = 0; i < SWARAS.length; i++) {
+      const target = G.saHz * SWARAS[i].ratio * Math.pow(2, oct);
+      const signed = centsBetween(freq, target);
+      const cents = Math.abs(signed);
+      if (cents < best.cents) best = { idx: i, cents, signed, target };
+    }
+  }
+  return best;
+}
+
+/* ---------- Microphone ---------- */
+async function initMic() {
+  if (!window.isSecureContext &&
+      location.hostname !== 'localhost' &&
+      location.hostname !== '127.0.0.1') {
+    throw new Error('माइक के लिए HTTPS या localhost ज़रूरी है। (file:// पर Chrome माइक नहीं देता)');
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    throw new Error('इस ब्राउज़र में microphone API उपलब्ध नहीं है।');
+  }
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) throw new Error('Web Audio API उपलब्ध नहीं है।');
+
+  if (!audioCtx) audioCtx = new AC();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+  if (!stream) {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+        channelCount: 1
+      }
+    });
+    sourceNode = audioCtx.createMediaStreamSource(stream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 4096;
+    analyser.smoothingTimeConstant = 0.6;
+    sourceNode.connect(analyser);
+    timeBuf = new Float32Array(analyser.fftSize);
+    freqBuf = new Uint8Array(analyser.frequencyBinCount);
+  }
+}
+
+/* ---------- Sargam strip ---------- */
+function buildStrip() {
+  stripEl.innerHTML = SWARAS.map((s, i) =>
+    `<span class="pill" data-i="${i}">${s.name}</span>`).join('');
+}
+buildStrip();
+
+function highlightPill(idx, cls) {
+  [...stripEl.children].forEach((el, k) => {
+    el.className = 'pill' + (k === idx && cls ? ' ' + cls : '');
+  });
+}
+function clearPills() {
+  [...stripEl.children].forEach(el => el.className = 'pill');
+}
+
+/* ---------- Guide ---------- */
+function openGuide() {
+  guideCardEl.innerHTML = `
+    <h1>📖 गाइड — सुर साधना</h1>
+    <p style="font-size:12px;opacity:.7;margin-bottom:14px">
+      पहली बार इस्तेमाल करने से पहले इसे एक बार पढ़ लें।
+    </p>
+
+    <details open>
+      <summary>1. स्वागत</summary>
+      <div class="content">
+        <p><b>सुर साधना</b> — बिना उस्ताद, बिना फीस, अपने सुर का रोज़ का रियाज़।
+        यह ऐप आपको भारतीय संगीत के 8 शुद्ध स्वरों
+        (<b>सा रे गा मा प ध नि सां</b>) की सटीक practice करवाएगा।</p>
+        <p>यह एक <b>pitch-accuracy practice tool</b> है — सुर की सटीकता नापने के लिए।</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>2. "सा" पहले क्यों देना है?</summary>
+      <div class="content">
+        <p><b>भारतीय संगीत का सबसे बड़ा नियम: "सा" fixed नहीं होता।</b></p>
+        <p>पश्चिमी संगीत में A = 440 Hz तय है। लेकिन भारतीय संगीत में
+        <b>हर गायक अपना सा खुद चुनता है</b> — अपनी आवाज़ की natural ऊँचाई के हिसाब से।
+        इसे <b>"अधार षड्ज"</b> कहते हैं।</p>
+        <p>• 👨 पुरुष की आवाज़ आम तौर पर <b>130 Hz</b> के आसपास सा रखती है<br>
+           • 👩 महिला की आवाज़ आम तौर पर <b>220 Hz</b> के आसपास<br>
+           • 🎤 लेकिन हर गला अलग — slider से खुद सेट करें या <b>🎤 अपना सा गाइए</b></p>
+        <p><b>अगर सा गलत दिया, तो बाकी सारे सुर (रे गा मा...) अपने आप गलत हो जाएँगे।</b></p>
+      </div>
+    </details>
+
+    <details>
+      <summary>3. सारेगामा कैसे बनता है?</summary>
+      <div class="content">
+        <p>एक बार सा तय हो जाए, तो बाकी 7 सुर गणित के हिसाब से निकलते हैं (Just Intonation):</p>
+        <table>
+          <tr><td>सा</td><td>1/1</td><td>130.0 Hz</td></tr>
+          <tr><td>रे</td><td>9/8</td><td>146.3 Hz</td></tr>
+          <tr><td>गा</td><td>5/4</td><td>162.5 Hz</td></tr>
+          <tr><td>मा</td><td>4/3</td><td>173.3 Hz</td></tr>
+          <tr><td>प</td><td>3/2</td><td>195.0 Hz</td></tr>
+          <tr><td>ध</td><td>5/3</td><td>216.7 Hz</td></tr>
+          <tr><td>नि</td><td>15/8</td><td>243.8 Hz</td></tr>
+          <tr><td>सां</td><td>2/1</td><td>260.0 Hz</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details>
+      <summary>4. रियाज़ कैसे करें + नया Pitch Needle</summary>
+      <div class="content">
+        <p>1. START दबाएँ — countdown होगा<br>
+           2. स्क्रीन पर बड़ा अक्षर दिखेगा — जैसे <b>सा</b><br>
+           3. उसी सुर को साफ़, स्थिर आवाज़ में गाएँ<br>
+           4. <b>बीच में ऊर्ध्वाधर सुई (needle)</b> देखें:</p>
+        <p style="padding-left:14px">
+           • सुई <b>ऊपर</b> = सुर बहुत ऊँचा (sharp) → नीचे लाइए<br>
+           • सुई <b>नीचे</b> = सुर बहुत नीचा (flat) → ऊपर उठाइए<br>
+           • सुई <b>बीच में हरा</b> = सही सुर
+        </p>
+        <p>5. नीचे बार चार्ट भी रंग बदलता है (हरा/पीला/लाल)<br>
+           6. हिंदी संदेश आपको बताएगा कि सुर ऊपर उठाना है या नीचे लाना है।</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>5. Hz बढ़ाना</summary>
+      <div class="content">
+        <p>जब सारे स्वर आसानी से हरे आने लगें, तो सा को 5–10 Hz ऊपर करके range बढ़ाएँ।
+        ज़बरदस्ती मत करो — गला दुखे तो सा वापस नीचे करो।</p>
+      </div>
+    </details>
+
+    <div class="tip">
+      <b>ध्यान दें:</b> शांत कमरे में गाएँ। हेडफोन पहनें ताकि स्पीकर की आवाज़ माइक में न जाए।
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btnPrimary" id="guideClose" style="flex:1">समझ गया ✓</button>
+    </div>
+  `;
+  guideEl.classList.remove('hidden');
+  const closeBtn = document.getElementById('guideClose');
+  if (closeBtn) closeBtn.onclick = () => guideEl.classList.add('hidden');
+}
+guideBtn.onclick = openGuide;
+
+/* ---------- Gender ---------- */
+function setGender(g) {
+  G.gender = g;
+  if (g === 'male')   G.saHz = 130.8;
+  if (g === 'female') G.saHz = 220.0;
+  const r = document.getElementById('saRange');
+  const v = document.getElementById('saVal');
+  if (r) r.value = G.saHz;
+  if (v) v.textContent = G.saHz.toFixed(1) + ' Hz';
+  document.querySelectorAll('.gRow button').forEach(b => {
+    b.classList.toggle('active', b.dataset.g === g);
+  });
+}
+
+/* ---------- Sa calibration ---------- */
+async function calibrateSa() {
+  const b = document.getElementById('calibrate');
+  if (b) { b.disabled = true; b.textContent = 'सुन रहा हूँ…'; }
+  try {
+    await initMic();
+    panelEl.classList.add('hidden');
+    hintEl.textContent = 'लगातार “सा——” गाइए… (3 सेकंड)';
+    heardEl.textContent = 'सा';
+    heardEl.style.color = '#8feaff';
+
+    const samples = [];
+    const started = performance.now();
+    await new Promise(resolve => {
+      const timer = setInterval(() => {
+        if (!analyser || !timeBuf) return;
+        analyser.getFloatTimeDomainData(timeBuf);
+        const r = yinPitch(timeBuf, audioCtx.sampleRate);
+        if (r && r.clarity >= 0.5) samples.push(r.freq);
+        if (performance.now() - started >= 3000) {
+          clearInterval(timer);
+          resolve();
+        }
+      }, 28);
+    });
+
+    panelEl.classList.remove('hidden');
+    if (samples.length < 12) {
+      throw new Error('स्थिर pitch नहीं मिली। शांत जगह 3 सेकंड साफ़ “सा——” गाइए।');
+    }
+
+    const med = median(samples);
+    const m = mad(samples, med);
+    const clean = samples.filter(x => Math.abs(x - med) <= Math.max(12, m * 3));
+    if (clean.length < 8) {
+      throw new Error('pitch बहुत अस्थिर। “सा” को एक ही सुर में लंबा रखें।');
+    }
+
+    G.saHz = median(clean);
+    G.gender = 'other';
+    showMenu(`आपका Sa लगभग ${G.saHz.toFixed(1)} Hz सेट हुआ। ✓`);
+  } catch (e) {
+    panelEl.classList.remove('hidden');
+    showMenu('Sa calibration नहीं हो पाया: ' + (e.message || e));
+  }
+}
+
+/* ---------- Menu ---------- */
+function showMenu(message) {
+  G.phase = 'menu';
+  panelEl.classList.remove('hidden');
+  stopBtn.classList.remove('visible');
+  countdownEl.classList.add('hidden');
+  clearPills();
+  targetNoteEl.textContent = '—';
+  heardEl.textContent = '—';
+  hintEl.textContent = 'शुरू करने के लिए START दबाएँ';
+  precisionEl.textContent = 'Pitch: —';
+
+  cardEl.innerHTML = `
+    <h1>सुर साधना 🎼</h1>
+    <p style="margin-bottom:14px;font-size:13px;opacity:.8">
+      रोज़ का रियाज़ साथी — सा रे गा मा प ध नि सां
+    </p>
+
+    <div class="section">
+      <label class="label">अपनी आवाज़ चुनें</label>
+      <div class="gRow">
+        <button data-g="male"   class="${G.gender === 'male'   ? 'active' : ''}">👨 पुरुष</button>
+        <button data-g="female" class="${G.gender === 'female' ? 'active' : ''}">👩 महिला</button>
+        <button data-g="other"  class="${G.gender === 'other'  ? 'active' : ''}">🎤 अन्य</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <label class="label">
+        आपका Sa: <span class="saVal" id="saVal">${G.saHz.toFixed(1)} Hz</span>
+      </label>
+      <input id="saRange" type="range" min="100" max="500" step="0.5" value="${G.saHz}">
+      <div class="info">
+        पश्चिमी संगीत में A = 440 Hz तय है, लेकिन भारतीय संगीत में
+        हर गायक अपना <b>सा</b> खुद चुनता है।
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+      <button class="btnSecondary btnTiny" id="guideOpenBtn">📖 गाइड पढ़ें</button>
+      <button class="btnSecondary btnTiny" id="calibrate">🎤 अपना सा गाइए</button>
+    </div>
+
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btnPrimary" id="start" style="flex:1">START ▶</button>
+    </div>
+
+    ${message ? `<div class="tip" style="margin-top:14px">${message}</div>` : ''}
+
+    <div class="tip" style="margin-top:14px">
+      <b>नई सुविधा:</b> गाने के दौरान बीच में ऊर्ध्वाधर सुई दिखेगी।
+      सुई ऊपर = सुर ऊँचा, सुई नीचे = सुर नीचा, हरा बीच = सही।
+    </div>
+  `;
+
+  document.querySelectorAll('.gRow button').forEach(b => {
+    b.onclick = () => setGender(b.dataset.g);
+  });
+
+  const r = document.getElementById('saRange');
+  const v = document.getElementById('saVal');
+  if (r && v) {
+    r.oninput = () => {
+      G.saHz = +r.value;
+      G.gender = 'other';
+      v.textContent = G.saHz.toFixed(1) + ' Hz';
+      document.querySelectorAll('.gRow button').forEach(b => b.classList.remove('active'));
+      const otherBtn = document.querySelector('.gRow button[data-g="other"]');
+      if (otherBtn) otherBtn.classList.add('active');
+    };
+  }
+
+  const guideOpenBtn = document.getElementById('guideOpenBtn');
+  if (guideOpenBtn) guideOpenBtn.onclick = openGuide;
+
+  const calBtn = document.getElementById('calibrate');
+  if (calBtn) calBtn.onclick = calibrateSa;
+
+  const startBtn = document.getElementById('start');
+  if (startBtn) startBtn.onclick = startGame;
+}
+
+/* ---------- Start ---------- */
+async function startGame() {
+  const b = document.getElementById('start');
+  if (b) { b.disabled = true; b.textContent = 'माइक तैयार हो रहा है…'; }
+  try {
+    await initMic();
+    resetSession();
+    runCountdown();
+  } catch (e) {
+    cardEl.innerHTML = `
+      <h1>🎤 माइक नहीं मिला</h1>
+      <p>${e.message || e}</p>
+      <p style="font-size:12px;opacity:.7">
+        Chrome में microphone permission <b>Allow</b> करें।<br>
+        HTTPS या localhost से खोलें (file:// पर माइक नहीं चलता)।
+      </p>
+      <button class="btnPrimary" id="retry" style="width:100%;margin-top:8px">फिर कोशिश करें</button>
+    `;
+    const retryBtn = document.getElementById('retry');
+    if (retryBtn) retryBtn.onclick = () => showMenu();
+  }
+}
+
+function resetSession() {
+  G.score = 0;
+  G.noteIdx = -1;
+  G.noteStart = 0;
+  G.noteGreenFrames = 0;
+  G.noteTotalFrames = 0;
+  G.noteScored = false;
+  G.rawFreq = 0;
+  G.freq = 0;
+  G.freqHistory = [];
+  G.centsHistory = [];
+  G.detectedIdx = -1;
+  G.cents = 999;
+  G.signedCents = 0;
+  G.clarity = 0;
+  G.rms = 0;
+  G.stability = 0;
+  G.needleY = 0.5;
+  G.streak = 0;
+  G.bestStreak = 0;
+  G.notesAttempted = 0;
+  G.notesCorrect = 0;
+  G.greenTotal = 0;
+  G.frameTotal = 0;
+  G.sessionStart = 0;
+  G.t = 0;
+
+  scoreEl.textContent = '0';
+  highEl.textContent = G.high;
+  targetNoteEl.textContent = '—';
+  heardEl.textContent = '—';
+  precisionEl.textContent = 'Pitch: —';
+  clearPills();
+}
+
+function runCountdown() {
+  G.phase = 'countdown';
+  panelEl.classList.add('hidden');
+  countdownEl.classList.remove('hidden');
+  let n = COUNTDOWN_START;
+  countdownEl.textContent = n;
+
+  const id = setInterval(() => {
+    n--;
+    if (n > 0) {
+      countdownEl.textContent = n;
+    } else if (n === 0) {
+      countdownEl.textContent = 'GO!';
+    } else {
+      clearInterval(id);
+      countdownEl.classList.add('hidden');
+      beginPlaying();
+    }
+  }, COUNTDOWN_STEP);
+}
+
+function beginPlaying() {
+  G.phase = 'playing';
+  G.t = 0;
+  G.sessionStart = performance.now();
+  stopBtn.classList.add('visible');
+  hintEl.textContent = 'लक्षित सुर को साफ़, स्थिर आवाज़ में गाएँ';
+  pickNextSwara();
+}
+
+function pickNextSwara() {
+  G.noteIdx = (G.noteIdx + 1) % SWARAS.length;
+  G.noteStart = G.t;
+  G.noteGreenFrames = 0;
+  G.noteTotalFrames = 0;
+  G.noteScored = false;
+
+  const name = SWARAS[G.noteIdx].name;
+  targetNoteEl.textContent = name;
+  targetNoteEl.style.color = '#8feaff';
+  highlightPill(G.noteIdx, 'active');
+  G.notesAttempted++;
+}
+
+/* ---------- Pitch reading + guidance ---------- */
+function readPitch() {
+  if (!analyser || !timeBuf) return;
+
+  analyser.getFloatTimeDomainData(timeBuf);
+  if (freqBuf) analyser.getByteFrequencyData(freqBuf);
+
+  G.rms = rmsOf(timeBuf);
+
+  const r = yinPitch(timeBuf, audioCtx.sampleRate);
+  const now = performance.now();
+
+  if (r && r.clarity >= CFG.clarityMin) {
+    G.rawFreq = r.freq;
+    G.clarity = r.clarity;
+    G.lastValidMs = now;
+
+    const alpha = G.freq ? 0.22 : 1;
+    G.freq = G.freq ? G.freq * (1 - alpha) + r.freq * alpha : r.freq;
+    G.freqHistory.push(G.freq);
+    if (G.freqHistory.length > 12) G.freqHistory.shift();
+
+    // Stability: low variance in recent frequencies = high stability
+    if (G.freqHistory.length >= 6) {
+      const avg = G.freqHistory.reduce((a, b) => a + b, 0) / G.freqHistory.length;
+      let varSum = 0;
+      for (const f of G.freqHistory) varSum += (f - avg) * (f - avg);
+      const std = Math.sqrt(varSum / G.freqHistory.length);
+      // ~2 Hz std = very stable, >15 Hz = unstable
+      G.stability = Math.max(0, Math.min(1, 1 - (std / 12)));
+    }
+
+    const q = nearestSwara(G.freq);
+    G.detectedIdx = q.idx;
+    G.cents = q.cents;
+    G.signedCents = q.signed;
+
+    if (q.idx >= 0) G.centsHistory.push(q.cents);
+    if (G.centsHistory.length > 200) G.centsHistory.shift();
+
+    // Update needle target (signed cents → position)
+    // Map ±60 cents to full range, clamp
+    const maxDisp = 60;
+    let norm = G.signedCents / maxDisp; // +1 = fully high, -1 = fully low
+    norm = Math.max(-1, Math.min(1, norm));
+    // needleY: 0 = top (high/sharp), 0.5 = center, 1 = bottom (low/flat)
+    const targetNeedle = 0.5 - norm * 0.45;
+    G.needleY += (targetNeedle - G.needleY) * 0.28;
+
+    // Precision line + cents
+    const signStr = G.signedCents >= 0 ? '+' : '';
+    precisionEl.textContent = q.idx >= 0
+      ? `${signStr}${G.signedCents.toFixed(0)}¢  •  स्थिरता ${(G.stability * 100).toFixed(0)}%`
+      : 'Pitch: —';
+
+    heardEl.textContent = q.idx >= 0 ? SWARAS[q.idx].name : '—';
+
+    // Directional guidance + colors
+    const isTarget = q.idx === G.noteIdx;
+    const absC = G.cents;
+
+    if (isTarget && absC <= TOL.green) {
+      heardEl.style.color = '#7dff9a';
+      targetNoteEl.style.color = '#7dff9a';
+      highlightPill(G.noteIdx, 'green');
+      hintEl.textContent = `✓ ${SWARAS[G.noteIdx].name} — बहुत सही! सुर पकड़ें`;
+    } else if (isTarget && absC <= TOL.yellow) {
+      heardEl.style.color = '#ffd66b';
+      targetNoteEl.style.color = '#8feaff';
+      highlightPill(G.noteIdx, 'yellow');
+      if (G.signedCents > 0) {
+        hintEl.textContent = `≈ थोड़ा ऊँचा है — सुर थोड़ा नीचे लाइए`;
+      } else {
+        hintEl.textContent = `≈ थोड़ा नीचा है — सुर थोड़ा ऊपर उठाइए`;
+      }
+    } else {
+      heardEl.style.color = '#ff9b9b';
+      targetNoteEl.style.color = '#8feaff';
+      highlightPill(G.noteIdx, 'red');
+      if (isTarget) {
+        if (G.signedCents > 0) {
+          hintEl.textContent = `सुर बहुत ऊँचा है — नीचे लाइए`;
+        } else {
+          hintEl.textContent = `सुर बहुत नीचा है — ऊपर उठाइए`;
+        }
+      } else {
+        hintEl.textContent = `लक्षित ${SWARAS[G.noteIdx].name} की तरफ़ जाएँ`;
+      }
+    }
+  } else {
+    if (now - G.lastValidMs > 120) {
+      G.freq *= 0.9;
+      if (G.freq < 80) G.freq = 0;
+      G.detectedIdx = -1;
+      G.cents = 999;
+      G.signedCents = 0;
+      G.stability = 0;
+      // gently return needle to center
+      G.needleY += (0.5 - G.needleY) * 0.08;
+    }
+    heardEl.textContent = '—';
+    heardEl.style.color = '#c8d2e0';
+    precisionEl.textContent = 'Pitch: — • आवाज़ खोज रहा हूँ…';
+    hintEl.textContent = 'साफ़ और लगातार आवाज़ दें';
+  }
+}
+
+/* ---------- Game update ---------- */
+function updateGame(dt) {
+  if (G.phase !== 'playing') return;
+
+  G.t += dt;
+  G.noteTotalFrames++;
+  G.frameTotal++;
+
+  if (G.detectedIdx === G.noteIdx && G.cents <= TOL.green) {
+    G.noteGreenFrames++;
+    G.greenTotal++;
+  }
+
+  const elapsed = (G.t - G.noteStart) * 1000;
+  if (elapsed >= NOTE_DURATION_MS && !G.noteScored) {
+    G.noteScored = true;
+
+    const total = G.noteTotalFrames || 1;
+    const greenRatio = G.noteGreenFrames / total;
+
+    if (greenRatio >= 0.6) {
+      G.score += 10;
+      G.streak++;
+      G.notesCorrect++;
+      if (G.streak > G.bestStreak) G.bestStreak = G.streak;
+      scoreEl.textContent = G.score;
+    } else if (greenRatio >= 0.3) {
+      G.score += 5;
+      G.streak = 0;
+      scoreEl.textContent = G.score;
+    } else {
+      G.streak = 0;
+    }
+
+    pickNextSwara();
+  }
+}
+
+/* ---------- Visualizer colors ---------- */
+function classifyColor() {
+  if (G.phase !== 'playing') return { top: '#4a5568', bot: '#4a556822' };
+  if (G.detectedIdx < 0)     return { top: '#3a4a5e', bot: '#3a4a5e22' };
+
+  const isTarget = G.detectedIdx === G.noteIdx;
+  if (isTarget && G.cents <= TOL.green)  return { top: '#7dff9a', bot: '#7dff9a22' };
+  if (isTarget && G.cents <= TOL.yellow) return { top: '#ffd66b', bot: '#ffd66b22' };
+  return { top: '#ff6b6b', bot: '#ff6b6b22' };
+}
+
+/* ---------- Vertical Pitch Needle ---------- */
+function drawPitchNeedle() {
+  if (G.phase !== 'playing' && G.phase !== 'countdown') return;
+
+  const gaugeW = Math.min(56, W * 0.14);
+  const gaugeH = Math.min(H * 0.38, 280);
+  const gx = W * 0.5 - gaugeW / 2;
+  const gy = H * 0.32;
+
+  // Background track
+  ctx.fillStyle = 'rgba(15,22,40,0.75)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, gx, gy, gaugeW, gaugeH, 12);
+  ctx.fill();
+  ctx.stroke();
+
+  // Color zones
+  const zoneH = gaugeH / 2;
+  // Top red (too high)
+  const gradTop = ctx.createLinearGradient(0, gy, 0, gy + zoneH);
+  gradTop.addColorStop(0, 'rgba(255,80,80,0.25)');
+  gradTop.addColorStop(1, 'rgba(255,200,80,0.12)');
+  ctx.fillStyle = gradTop;
+  ctx.fillRect(gx + 2, gy + 2, gaugeW - 4, zoneH - 2);
+
+  // Bottom red (too low)
+  const gradBot = ctx.createLinearGradient(0, gy + zoneH, 0, gy + gaugeH);
+  gradBot.addColorStop(0, 'rgba(255,200,80,0.12)');
+  gradBot.addColorStop(1, 'rgba(255,80,80,0.25)');
+  ctx.fillStyle = gradBot;
+  ctx.fillRect(gx + 2, gy + zoneH, gaugeW - 4, zoneH - 2);
+
+  // Green center band
+  const greenH = gaugeH * 0.18;
+  ctx.fillStyle = 'rgba(125,255,154,0.22)';
+  ctx.fillRect(gx + 2, gy + gaugeH / 2 - greenH / 2, gaugeW - 4, greenH);
+
+  // Center line
+  ctx.strokeStyle = 'rgba(143,234,255,0.55)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(gx + 4, gy + gaugeH / 2);
+  ctx.lineTo(gx + gaugeW - 4, gy + gaugeH / 2);
+  ctx.stroke();
+
+  // Labels
+  ctx.font = '10px system-ui';
+  ctx.fillStyle = 'rgba(255,180,180,0.7)';
+  ctx.textAlign = 'center';
+  ctx.fillText('ऊँचा', gx + gaugeW / 2, gy + 14);
+  ctx.fillStyle = 'rgba(180,255,200,0.7)';
+  ctx.fillText('सही', gx + gaugeW / 2, gy + gaugeH / 2 + 4);
+  ctx.fillStyle = 'rgba(255,180,180,0.7)';
+  ctx.fillText('नीचा', gx + gaugeW / 2, gy + gaugeH - 8);
+
+  // Needle
+  const ny = gy + G.needleY * gaugeH;
+  let needleCol = '#8feaff';
+  if (G.detectedIdx >= 0 && G.detectedIdx === G.noteIdx) {
+    if (G.cents <= TOL.green) needleCol = '#7dff9a';
+    else if (G.cents <= TOL.yellow) needleCol = '#ffd66b';
+    else needleCol = '#ff6b6b';
+  } else if (G.detectedIdx >= 0) {
+    needleCol = '#ff6b6b';
+  }
+
+  // Needle glow
+  ctx.shadowColor = needleCol;
+  ctx.shadowBlur = 12;
+  ctx.fillStyle = needleCol;
+  // triangle needle pointing right
+  ctx.beginPath();
+  ctx.moveTo(gx - 2, ny);
+  ctx.lineTo(gx + gaugeW * 0.55, ny - 7);
+  ctx.lineTo(gx + gaugeW * 0.55, ny + 7);
+  ctx.closePath();
+  ctx.fill();
+
+  // small circle
+  ctx.beginPath();
+  ctx.arc(gx + gaugeW * 0.55, ny, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Stability dots under gauge
+  if (G.stability > 0.1) {
+    const dots = 5;
+    const dotY = gy + gaugeH + 14;
+    for (let i = 0; i < dots; i++) {
+      const active = G.stability > (i + 1) / (dots + 1);
+      ctx.fillStyle = active ? 'rgba(125,255,154,0.85)' : 'rgba(255,255,255,0.12)';
+      ctx.beginPath();
+      ctx.arc(gx + gaugeW / 2 - (dots - 1) * 5 + i * 10, dotY, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+/* ---------- Bottom visualizer ---------- */
+function drawVisualizer() {
+  vctx.clearRect(0, 0, W, VH);
+
+  const bg = vctx.createLinearGradient(0, 0, 0, VH);
+  bg.addColorStop(0, 'rgba(10,16,28,0)');
+  bg.addColorStop(0.35, 'rgba(10,16,28,0.55)');
+  bg.addColorStop(1, 'rgba(10,16,28,0.92)');
+  vctx.fillStyle = bg;
+  vctx.fillRect(0, 0, W, VH);
+
+  const N = G.vizBars.length;
+  const barW = W / N;
+  const col = classifyColor();
+
+  const sr = audioCtx ? audioCtx.sampleRate : 44100;
+  const nyq = sr / 2;
+  const fLow = 80, fHigh = 2500;
+  const logLow = Math.log2(fLow);
+  const logHigh = Math.log2(fHigh);
+
+  for (let i = 0; i < N; i++) {
+    let target = 0;
+    if (freqBuf) {
+      const f0 = Math.pow(2, logLow + (logHigh - logLow) * i / N);
+      const f1 = Math.pow(2, logLow + (logHigh - logLow) * (i + 1) / N);
+      const b0 = Math.max(0, Math.floor(f0 / nyq * freqBuf.length));
+      const b1 = Math.min(freqBuf.length - 1, Math.max(b0 + 1, Math.floor(f1 / nyq * freqBuf.length)));
+      let s = 0;
+      for (let b = b0; b < b1; b++) s += freqBuf[b];
+      target = (s / Math.max(1, b1 - b0)) / 255;
+    }
+
+    const cur = G.vizBars[i];
+    G.vizBars[i] = target > cur
+      ? cur * 0.4 + target * 0.6
+      : cur * 0.85 + target * 0.15;
+
+    const h = Math.max(2, G.vizBars[i] * VH * 0.95);
+    const x = i * barW + 1;
+    const y = VH - h;
+
+    const g = vctx.createLinearGradient(0, y, 0, VH);
+    g.addColorStop(0, col.top);
+    g.addColorStop(1, col.bot);
+    vctx.fillStyle = g;
+    vctx.fillRect(x, y, barW - 2, h);
+
+    vctx.globalAlpha = 0.65;
+    vctx.fillStyle = col.top;
+    vctx.fillRect(x, y, barW - 2, 2);
+    vctx.globalAlpha = 1;
+  }
+
+  if (G.rms > 0.001) {
+    const lvl = Math.min(1, G.rms * 8);
+    vctx.globalAlpha = 0.5;
+    vctx.fillStyle = col.top;
+    vctx.fillRect(0, 2, W * lvl, 2);
+    vctx.globalAlpha = 1;
+  }
+}
+
+/* ---------- Background ---------- */
+function drawBackground() {
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, '#0b1220');
+  sky.addColorStop(0.6, '#101a30');
+  sky.addColorStop(1, '#0e1420');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+
+  for (const s of G.stars) {
+    const tw = 0.5 + 0.5 * Math.sin(G.t * s.sp + s.tw);
+    ctx.globalAlpha = 0.15 + tw * 0.35;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(s.x * W, s.y * H, s.s, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+/* ---------- Main loop ---------- */
+let lastTs = 0;
+function loop(ts) {
+  try {
+    const dt = Math.min(0.05, (ts - lastTs) / 1000 || 0.016);
+    lastTs = ts;
+
+    if (G.phase === 'playing') readPitch();
+
+    if (G.phase === 'playing') {
+      updateGame(dt);
+    } else {
+      G.t += dt;
+    }
+
+    drawBackground();
+    drawPitchNeedle();
+    drawVisualizer();
+  } catch (err) {
+    console.error('Loop error:', err);
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ---------- Stop → summary ---------- */
+stopBtn.onclick = () => {
+  if (G.phase !== 'playing') return;
+  G.phase = 'summary';
+  stopBtn.classList.remove('visible');
+  showSummary();
+};
+
+function showSummary() {
+  const durMs = performance.now() - G.sessionStart;
+  const durSec = Math.max(1, Math.round(durMs / 1000));
+  const mm = Math.floor(durSec / 60);
+  const ss = durSec % 60;
+  const durText = `${mm}:${String(ss).padStart(2, '0')}`;
+
+  const avgCents = (() => {
+    const a = G.centsHistory.filter(x => Number.isFinite(x) && x < 999);
+    if (!a.length) return 0;
+    return Math.round(a.reduce((x, y) => x + y, 0) / a.length);
+  })();
+
+  const accuracy = G.frameTotal ? Math.round(100 * G.greenTotal / G.frameTotal) : 0;
+
+  if (G.score > G.high) {
+    G.high = G.score;
+    try { localStorage.setItem('surSadhanaHigh', String(G.high)); } catch (_) {}
+    highEl.textContent = G.high;
+  }
+
+  panelEl.classList.remove('hidden');
+  clearPills();
+
+  cardEl.innerHTML = `
+    <h1>रियाज़ पूरा ✓</h1>
+    <p style="opacity:.75">आज का session summary</p>
+
+    <div class="report">
+      <div class="box"><div class="big">${G.score}</div><small>स्कोर</small></div>
+      <div class="box"><div class="big">${G.high}</div><small>हाई स्कोर</small></div>
+      <div class="box"><div class="big">${durText}</div><small>समय</small></div>
+      <div class="box"><div class="big">${accuracy}%</div><small>हरा समय</small></div>
+      <div class="box"><div class="big">${G.notesCorrect} / ${G.notesAttempted}</div><small>सही स्वर</small></div>
+      <div class="box"><div class="big">${avgCents}¢</div><small>औसत दूरी</small></div>
+      <div class="box"><div class="big">${G.bestStreak}</div><small>लंबी streak</small></div>
+      <div class="box"><div class="big">${G.saHz.toFixed(0)}</div><small>Sa (Hz)</small></div>
+    </div>
+
+    <div class="tip">
+      <b>बेहतर रियाज़ के लिए:</b> रोज़ 15–20 मिनट काफ़ी है।
+      जब सारे स्वर हरे रंग में आसानी से आने लगें, तो
+      सा को 5–10 Hz ऊपर करके आगे बढ़ें।
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btnPrimary" id="again" style="flex:1">फिर शुरू करें</button>
+      <button class="btnSecondary" id="menu2" style="flex:1">मुख्य मेन्यू</button>
+    </div>
+  `;
+
+  const againBtn = document.getElementById('again');
+  if (againBtn) againBtn.onclick = async () => {
+    try {
+      await initMic();
+      resetSession();
+      runCountdown();
+    } catch (e) {
+      showMenu('माइक दोबारा नहीं मिला: ' + (e.message || e));
+    }
+  };
+
+  const menuBtn = document.getElementById('menu2');
+  if (menuBtn) menuBtn.onclick = () => showMenu();
+}
+
+/* ---------- Boot ---------- */
+showMenu();
+requestAnimationFrame(loop);
+
+try {
+  if (!localStorage.getItem('surSadhanaSeen_v3')) {
+    localStorage.setItem('surSadhanaSeen_v3', '1');
+    setTimeout(openGuide, 400);
+  }
+} catch (_) {}
+
+})();
+</script>
+</body>
+</html>

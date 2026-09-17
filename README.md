@@ -28,9 +28,8 @@ Just open and start your daily riyaz!
 
 Try it instantly here:
 
-**Live Website:** [https://yourusername.github.io/sur-sadhana/](https://yourusername.github.io/sur-sadhana/)
+**Live Website:** [click here](https:/Aeronutist.github.io/sur-sadhana/)
 
-> Replace `yourusername` with your actual GitHub username after enabling GitHub Pages.
 
 ---
 
